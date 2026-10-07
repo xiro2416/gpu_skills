@@ -1,0 +1,3 @@
+interface:
+  display_name: "GPU Inference Optimization"
+  short_description: "Optimize NVIDIA GPU inference end to end"

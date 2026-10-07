@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1540" viewBox="0 0 1280 1540" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">GPU 推理迁移｜决策流程</title>
+<desc id="diagram-desc">七个主节点：恢复源与目标条件并读取共享 GPU 画像，盘点源机制及相关旧负结果的前提，在目标恢复计算机制并充分构建，验证目标基线，适配或定向复查已有机制，验收，交付并停止。新机制留给独立优化任务；性能优先，功耗不作惩罚。</desc>
+<defs>
+<marker id="main-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#527daf"/></marker>
+<marker id="retry-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b56b32"/></marker>
+<marker id="review-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#527daf"/></marker>
+</defs>
+<style>
+text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", sans-serif; }
+.title { font-size: 32px; font-weight: 700; fill: #193b60; }
+.subtitle { font-size: 20px; fill: #50647a; }
+.heading { font-size: 24px; font-weight: 700; }
+.body { font-size: 20px; fill: #2b3c50; }
+.number { font-size: 18px; font-weight: 700; fill: #fff; }
+.label { font-size: 18px; font-weight: 600; }
+.label.retry { fill: #965823; }
+.label.review { fill: #365d88; }
+.edge { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.edge.main { stroke: #527daf; }
+.edge.retry { stroke: #b56b32; stroke-dasharray: 7 6; }
+.edge.review { stroke: #527daf; stroke-dasharray: 7 6; }
+.link { font-size: 18px; fill: #365d88; text-decoration: underline; }
+</style>
+<rect width="1280" height="1540" fill="#f6f8fb"/>
+<text x="56" y="59" class="title" text-anchor="start">GPU 推理迁移｜决策流程</text>
+<text x="56" y="98" class="subtitle" text-anchor="start">同模型、硬件、后端与量化配方内迁移 batch／shape／长度；验收后停止。</text>
+<text x="56" y="126" class="label review" text-anchor="start">按目标性能与正确性选方案；高功耗不作惩罚，低功耗本身不加分。</text>
+<path class="edge main" d="M 640 278 V 317" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 450 V 489" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 644 V 683" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 838 V 877" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 1032 V 1071" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 1246 V 1285" marker-end="url(#main-arrow)"/>
+<path class="edge retry" d="M 1035 760 H 1144 V 566 H 1040" marker-end="url(#retry-arrow)"/>
+<path class="edge retry" d="M 1035 1161 H 1144 V 957 H 1040" marker-end="url(#retry-arrow)"/>
+<path class="edge review" d="M 245 1161 H 134 V 386 H 240" marker-end="url(#review-arrow)"/>
+<g id="m-context" class="node" data-number="1">
+<rect x="245" y="150" width="790" height="128" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="184" r="17" fill="#214b79"/>
+<text x="278" y="190" class="number" text-anchor="middle">1</text>
+<text x="307" y="192" class="heading" fill="#214b79">明确源 → 目标，恢复迁移上下文</text>
+<text x="273" y="227" class="body" text-anchor="start">确认范围与标准，读取源白板及匹配的 GPU 画像。</text>
+<text x="273" y="255" class="body" text-anchor="start">建立独立目标白板与产物，保留源实现、结果及相关历史。</text>
+</g>
+<g id="m-coverage" class="node" data-number="2">
+<rect x="245" y="322" width="790" height="128" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="356" r="17" fill="#214b79"/>
+<text x="278" y="362" class="number" text-anchor="middle">2</text>
+<text x="307" y="364" class="heading" fill="#214b79">盘点源机制、前提与目标处置</text>
+<text x="273" y="399" class="body" text-anchor="start">包括重要已采用机制及与本次变化有关的旧拒绝／搁置项。</text>
+<text x="273" y="427" class="body" text-anchor="start">记录原生效或否定前提；条件改变时定向复查或交接。</text>
+</g>
+<g id="m-build" class="node" data-number="3">
+<rect x="245" y="494" width="790" height="150" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="528" r="17" fill="#214b79"/>
+<text x="278" y="534" class="number" text-anchor="middle">3</text>
+<text x="307" y="536" class="heading" fill="#214b79">恢复源结构与机制，充分构建目标基线</text>
+<text x="273" y="571" class="body" text-anchor="start">先适配已有图、融合和自定义机制，核对 shape 假设。</text>
+<text x="273" y="599" class="body" text-anchor="start">按实际后端为目标充分构建，检查融合覆盖与 engine 分区。</text>
+<text x="273" y="627" class="body" text-anchor="start">完成此基线后，再迁移应用调度机制。</text>
+</g>
+<g id="m-baseline" class="node" data-number="4">
+<rect x="245" y="688" width="790" height="150" rx="16" fill="#fff8e5" stroke="#c9993c" stroke-width="2"/>
+<circle cx="278" cy="722" r="17" fill="#815c11"/>
+<text x="278" y="728" class="number" text-anchor="middle">4</text>
+<text x="307" y="730" class="heading" fill="#815c11">目标基线是否正确、真实且可复现？</text>
+<text x="273" y="765" class="body" text-anchor="start">核实实际后端、形状、精度和 fallback，验证完整输出。</text>
+<text x="273" y="793" class="body" text-anchor="start">用原参考与标准验收目标输入，保留构建与运行证据。</text>
+<text x="273" y="821" class="body" text-anchor="start">测量框架执行时间并记录计时边界；未通过则定位修复。</text>
+</g>
+<g id="m-adapt" class="node" data-number="5">
+<rect x="245" y="882" width="790" height="150" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="916" r="17" fill="#214b79"/>
+<text x="278" y="922" class="number" text-anchor="middle">5</text>
+<text x="307" y="924" class="heading" fill="#214b79">适配已有应用机制及受影响依赖</text>
+<text x="273" y="959" class="body" text-anchor="start">调整 buffers、capture、chunk、streams 与复用边界。</text>
+<text x="273" y="987" class="body" text-anchor="start">核对地址、尺寸、索引、状态和依赖，重建失效产物。</text>
+<text x="273" y="1015" class="body" text-anchor="start">基线通过后复查受影响的既有失败候选；新机制交接。</text>
+</g>
+<g id="m-check" class="node" data-number="6">
+<rect x="245" y="1076" width="790" height="170" rx="16" fill="#fff8e5" stroke="#c9993c" stroke-width="2"/>
+<circle cx="278" cy="1110" r="17" fill="#815c11"/>
+<text x="278" y="1116" class="number" text-anchor="middle">6</text>
+<text x="307" y="1118" class="heading" fill="#815c11">源优化覆盖与目标结果是否已验收？</text>
+<text x="273" y="1153" class="body" text-anchor="start">简表记录机制、原前提、目标决定与证据或后续线索。</text>
+<text x="273" y="1181" class="body" text-anchor="start">按同一目标负载与完整边界，比对无 profiler 端到端结果。</text>
+<text x="273" y="1209" class="body" text-anchor="start">融合／engine 分区不同：报告整体方案收益，不可单归因于 batch。</text>
+</g>
+<g id="m-deliver" class="node" data-number="7">
+<rect x="245" y="1290" width="790" height="128" rx="16" fill="#edf7f0" stroke="#699b7d" stroke-width="2"/>
+<circle cx="278" cy="1324" r="17" fill="#326048"/>
+<text x="278" y="1330" class="number" text-anchor="middle">7</text>
+<text x="307" y="1332" class="heading" fill="#326048">交付目标白板与产物，停止迁移</text>
+<text x="273" y="1367" class="body" text-anchor="start">交付目标实现、复现命令、覆盖结论、正确性与性能证据。</text>
+<text x="273" y="1395" class="body" text-anchor="start">保留源成果；新机制与剩余机会交给后续独立优化任务。</text>
+</g>
+<g class="edge-label"><rect x="1052" y="629" width="184" height="58" rx="10" fill="#f6f8fb"/>
+<text x="1144" y="652" class="label retry" text-anchor="middle">基线未通过</text>
+<text x="1144" y="678" class="label retry" text-anchor="middle">定位并修复</text>
+</g>
+<g class="edge-label"><rect x="1052" y="1017" width="184" height="58" rx="10" fill="#f6f8fb"/>
+<text x="1144" y="1040" class="label retry" text-anchor="middle">适配未通过</text>
+<text x="1144" y="1066" class="label retry" text-anchor="middle">修正后复验</text>
+</g>
+<g class="edge-label"><rect x="40" y="734" width="188" height="58" rx="10" fill="#f6f8fb"/>
+<text x="134" y="757" class="label review" text-anchor="middle">源覆盖缺失</text>
+<text x="134" y="783" class="label review" text-anchor="middle">恢复后复验</text>
+</g>
+<text x="668" y="1275" class="label review" text-anchor="start">覆盖清楚且验收通过</text>
+<path d="M 56 1450 H 1224" stroke="#d8e1eb" stroke-width="1"/>
+<a href="SKILL.md"><text x="56" y="1485" class="link" text-anchor="start">Skill 正文</text></a>
+<a href="references/target-baseline.md"><text x="226" y="1485" class="link" text-anchor="start">目标基线</text></a>
+<a href="references/reuse-and-validation.md"><text x="406" y="1485" class="link" text-anchor="start">复用与验证</text></a>
+<a href="../gpu_parameters/README.md"><text x="636" y="1485" class="link" text-anchor="start">共享 GPU 画像</text></a>
+</svg>

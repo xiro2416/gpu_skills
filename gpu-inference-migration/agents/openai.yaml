@@ -1,0 +1,3 @@
+interface:
+  display_name: "GPU Inference Migration"
+  short_description: "Retarget optimized inference and validate inherited work"

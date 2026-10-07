@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1540" viewBox="0 0 1280 1540" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">GPU 推理优化｜决策流程</title>
+<desc id="diagram-desc">七个主节点：固定负载和目标并读取共享 GPU 画像，验证实际基线，审视主要成本，探测因果及 Tensor/CUDA 工作分配，实施并验证，保留结果和复查线索，交付。性能优先，功耗不作惩罚；失败或不确定返回探针。</desc>
+<defs>
+<marker id="main-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#527daf"/></marker>
+<marker id="retry-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b56b32"/></marker>
+<marker id="review-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#527daf"/></marker>
+</defs>
+<style>
+text { font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", sans-serif; }
+.title { font-size: 32px; font-weight: 700; fill: #193b60; }
+.subtitle { font-size: 20px; fill: #50647a; }
+.heading { font-size: 24px; font-weight: 700; }
+.body { font-size: 20px; fill: #2b3c50; }
+.number { font-size: 18px; font-weight: 700; fill: #fff; }
+.label { font-size: 18px; font-weight: 600; }
+.label.retry { fill: #965823; }
+.label.review { fill: #365d88; }
+.edge { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.edge.main { stroke: #527daf; }
+.edge.retry { stroke: #b56b32; stroke-dasharray: 7 6; }
+.edge.review { stroke: #527daf; stroke-dasharray: 7 6; }
+.link { font-size: 18px; fill: #365d88; text-decoration: underline; }
+</style>
+<rect width="1280" height="1540" fill="#f6f8fb"/>
+<text x="56" y="59" class="title" text-anchor="start">GPU 推理优化｜决策流程</text>
+<text x="56" y="98" class="subtitle" text-anchor="start">建立可靠基线，以执行证据选择改法；验证后继续审视剩余机会。</text>
+<text x="56" y="126" class="label review" text-anchor="start">性能优先：高功耗不作惩罚，低功耗本身不加分；只增加有用计算。</text>
+<path class="edge main" d="M 640 278 V 317" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 470 V 509" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 684 V 723" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 874 V 913" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 1064 V 1103" marker-end="url(#main-arrow)"/>
+<path class="edge main" d="M 640 1236 V 1275" marker-end="url(#main-arrow)"/>
+<path class="edge review" d="M 245 1172 H 134 V 600 H 240" marker-end="url(#review-arrow)"/>
+<path class="edge retry" d="M 1035 1172 H 1144 V 800 H 1040" marker-end="url(#retry-arrow)"/>
+<g id="o-context" class="node" data-number="1">
+<rect x="245" y="150" width="790" height="128" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="184" r="17" fill="#214b79"/>
+<text x="278" y="190" class="number" text-anchor="middle">1</text>
+<text x="307" y="192" class="heading" fill="#214b79">固定负载、目标与比较依据</text>
+<text x="273" y="227" class="body" text-anchor="start">沿用目标与约束；读取白板和匹配的 GPU 画像。</text>
+<text x="273" y="255" class="body" text-anchor="start">区分固定参考、原始性能与当前最佳，明确完整计时边界。</text>
+</g>
+<g id="o-baseline" class="node" data-number="2">
+<rect x="245" y="322" width="790" height="148" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="356" r="17" fill="#214b79"/>
+<text x="278" y="362" class="number" text-anchor="middle">2</text>
+<text x="307" y="364" class="heading" fill="#214b79">建立并验证实际框架与硬件基线</text>
+<text x="273" y="399" class="body" text-anchor="start">按画像确认实际 SKU、资源与能力，再充分构建。</text>
+<text x="273" y="427" class="body" text-anchor="start">核实执行路径、正确性和完整性能，保留可复现产物。</text>
+<text x="273" y="455" class="body" text-anchor="start">框架搜索充分后，仍需审视其实际生成的执行结构。</text>
+</g>
+<g id="o-review" class="node" data-number="3">
+<rect x="245" y="514" width="790" height="170" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="548" r="17" fill="#214b79"/>
+<text x="278" y="554" class="number" text-anchor="middle">3</text>
+<text x="307" y="556" class="heading" fill="#214b79">尽早审视主要成本与执行结构</text>
+<text x="273" y="591" class="body" text-anchor="start">检查融合覆盖、engine 分区、布局／物化与工作分配。</text>
+<text x="273" y="619" class="body" text-anchor="start">寻找独立工作，结合依赖、资源占用与硬件上限判断。</text>
+<text x="273" y="647" class="body" text-anchor="start">硬件受限不等于 SM 空闲；低 Tensor／功耗需执行证据。</text>
+</g>
+<g id="o-probe" class="node" data-number="4">
+<rect x="245" y="728" width="790" height="146" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="762" r="17" fill="#214b79"/>
+<text x="278" y="768" class="number" text-anchor="middle">4</text>
+<text x="307" y="770" class="heading" fill="#214b79">定位成本，提出可验证的改法</text>
+<text x="273" y="805" class="body" text-anchor="start">用 trace、构建报告或受控探针区分观察、推测与未知。</text>
+<text x="273" y="833" class="body" text-anchor="start">按完整收益与新增代价，选择融合、表示、分配或调度。</text>
+<text x="273" y="861" class="body" text-anchor="start">比较 Tensor／CUDA Core 分工，计入依赖与新增代价。</text>
+</g>
+<g id="o-verify" class="node" data-number="5">
+<rect x="245" y="918" width="790" height="146" rx="16" fill="#ffffff" stroke="#527daf" stroke-width="2"/>
+<circle cx="278" cy="952" r="17" fill="#214b79"/>
+<text x="278" y="958" class="number" text-anchor="middle">5</text>
+<text x="307" y="960" class="heading" fill="#214b79">实施候选，验证完整工作与收益</text>
+<text x="273" y="995" class="body" text-anchor="start">按既定标准验证正确性，确认全部输出和依赖已完成。</text>
+<text x="273" y="1023" class="body" text-anchor="start">同负载、同边界、无 profiler，比对当前最佳的端到端表现。</text>
+<text x="273" y="1051" class="body" text-anchor="start">融合／engine 分区改变时，收益归于整体方案。</text>
+</g>
+<g id="o-decide" class="node" data-number="6">
+<rect x="245" y="1108" width="790" height="128" rx="16" fill="#fff8e5" stroke="#c9993c" stroke-width="2"/>
+<circle cx="278" cy="1142" r="17" fill="#815c11"/>
+<text x="278" y="1148" class="number" text-anchor="middle">6</text>
+<text x="307" y="1150" class="heading" fill="#815c11">保留有效改动，复查剩余线索</text>
+<text x="273" y="1185" class="body" text-anchor="start">更新当前最佳与记录；执行结构变化后刷新成本归因。</text>
+<text x="273" y="1213" class="body" text-anchor="start">失败或不确定时修正探针；评估仍值得投入的方向。</text>
+</g>
+<g id="o-deliver" class="node" data-number="7">
+<rect x="245" y="1280" width="790" height="128" rx="16" fill="#edf7f0" stroke="#699b7d" stroke-width="2"/>
+<circle cx="278" cy="1314" r="17" fill="#326048"/>
+<text x="278" y="1320" class="number" text-anchor="middle">7</text>
+<text x="307" y="1322" class="heading" fill="#326048">交付实现、结果与复现依据</text>
+<text x="273" y="1357" class="body" text-anchor="start">交付产物、命令、完整指标和适用条件，更新白板与历史。</text>
+<text x="273" y="1385" class="body" text-anchor="start">说明已验证结论、未解问题，以及结束本轮的依据。</text>
+</g>
+<g class="edge-label"><rect x="50" y="851" width="168" height="58" rx="10" fill="#f6f8fb"/>
+<text x="134" y="874" class="label review" text-anchor="middle">仍有线索</text>
+<text x="134" y="900" class="label review" text-anchor="middle">重新审视</text>
+</g>
+<g class="edge-label"><rect x="1049" y="958" width="190" height="58" rx="10" fill="#f6f8fb"/>
+<text x="1144" y="981" class="label retry" text-anchor="middle">失败／不确定</text>
+<text x="1144" y="1007" class="label retry" text-anchor="middle">修正探针</text>
+</g>
+<text x="668" y="1265" class="label review" text-anchor="start">暂无值得继续的线索</text>
+<path d="M 56 1450 H 1224" stroke="#d8e1eb" stroke-width="1"/>
+<a href="SKILL.md"><text x="56" y="1485" class="link" text-anchor="start">Skill 正文</text></a>
+<a href="references/framework-baseline.md"><text x="226" y="1485" class="link" text-anchor="start">框架基线</text></a>
+<a href="references/measurement-and-profiling.md"><text x="406" y="1485" class="link" text-anchor="start">测量与诊断</text></a>
+<a href="references/optimization-strategies.md"><text x="606" y="1485" class="link" text-anchor="start">优化策略</text></a>
+<a href="../gpu_parameters/README.md"><text x="806" y="1485" class="link" text-anchor="start">共享 GPU 画像</text></a>
+</svg>
