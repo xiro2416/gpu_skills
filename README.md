@@ -23,6 +23,7 @@ gpu-inference-migration/
 gpu_parameters/
   README.md
   rtx6000d-sm120.md
+  rtx4090-sm89-48g.md
 ```
 
 使用时保留三个目录的同级关系，两个 Skill 通过相对路径读取共享资料。`gpu_parameters` 是数据目录，并非第三个 Skill。请从对应 `SKILL.md` 开始，按当前问题读取参考文档。
@@ -36,4 +37,4 @@ gpu_parameters/
 
 ## GPU 资料
 
-见 [共享资料索引](gpu_parameters/README.md)。目前包含 RTX 6000D / SM120 的硬件和已有测量资料；不同 GPU 应提供对应的能力、测试条件与测量来源。
+见 [共享资料索引](gpu_parameters/README.md)。目前包含 RTX 6000D / SM120，以及本机约 48 GiB RTX 4090 / SM89 的硬件资源和已有测量资料。4090 采用未观察到温度限频的历史窗口，INT8 Compute Roof 为 635.70 TOPS；功率限频及输入、累加、输出、规模和数值校验边界另行注明。不同 GPU 或配置应提供对应的能力、测试条件与测量来源。
