@@ -1,35 +1,36 @@
 ---
 name: gpu-inference-migration
-description: "Migrate optimized NVIDIA inference to a new batch size, shape or sequence length on the same model, hardware, backend and quantization recipe. Establish the target baseline, transfer applicable optimizations, validate and hand off."
+description: "Migrate portable inference scheduling and state-management mechanisms for the same model to a new GPU, backend or workload. Validate a target baseline, then hand off to gpu-inference-optimization within the task budget."
 ---
 
 # GPU inference migration
 
-Transfer the optimized computation and its applicable mechanisms, validating them under the target workload. Source performance is evidence about source conditions.
+Transfer applicable logic first, establish a correct target baseline, then optimize for the target. No framework is preferred. Portability of a design does not establish implementation compatibility or target performance.
 
 ## Establish source and target
 
-Read the source whiteboard and relevant code, effective configuration and experiment records. Establish the requested shapes, inputs, objective, semantic reference and agreed correctness criteria. Recover project facts before asking for missing information essential to proceed; reuse existing authorization.
+Read source records and effective code/configuration. Freeze the requested model/checkpoint, source and target hardware/backend/workload, semantic reference, quality criteria, test protocol, remaining budget and authorization. New GPU/backend/shape are supported migration targets; changes to precision, quantization or calibration require task authorization. A different model needs fresh semantic validation, not transplantation of model state.
 
-Before building, read the matching [GPU profile](../gpu_parameters/README.md) and record its link and relevant conditions in the target whiteboard.
+Read relevant available [GPU profiles](../gpu_parameters/README.md). Preserve source artifacts and create an independent target record. Do not repeat unrelated historical experiments or modify the source to make the target easier.
 
-Keep the model/checkpoint, actual hardware, backend/version, precision and quantization recipe fixed. Migration alone does not authorize recalibration, a new quantization method or changed acceptance criteria. Resolve broader changes to these assumptions before treating the task as this migration. Preserve source code, artifacts and caches; put target changes and writable cache copies in separate locations, respecting project resource limits.
+## Transfer by portability and dependency
 
-Judge target schemes by correctness and the agreed performance objective: increased power is not a penalty, and reduced watts alone are not a gain.
+Inventory consequential source mechanisms and classify them:
 
-## Transfer in dependency order
+- **Reusable logic:** request lifecycle, deadlines, admission, logical P/D, state ownership, invalidation and streaming boundaries. Adapt APIs and dependencies first; reuse the design, not assumptions about its benefit.
+- **Environment-dependent parameters:** worker/stream counts, batch/slot limits, length buckets, partition sizes and queue budgets. Establish safe legal values; leave performance tuning to optimization.
+- **Hardware/backend-bound implementations:** kernels, engines, captures, layouts, IPC and synchronization primitives. Reuse only when compatible. Adapt or rebuild what is necessary for correctness, or use an authorized fallback; document lost coverage and its cost.
 
-1. Summarize consequential source mechanisms, including relevant rejected or deferred candidates: their implementation, prerequisites or rejection reason, and target disposition. Include graph/fusion/custom coverage as well as application scheduling; correct outputs alone cannot reveal missing optimization coverage.
-2. Establish a strong target baseline from the validated source representation and compute mechanisms. Adapt shape-dependent graph, plugin/kernel interfaces and build inputs; restore applicable inherited coverage. Verify through a minimal correct invocation before transplanting source application scheduling. See [Target baseline](references/target-baseline.md).
-3. Adapt the existing buffers, captures, reuse, chunking and stream behavior whose assumptions change. Check target execution and compare affected choices selectively; an integrated check can cover mechanisms whose prerequisites still hold. See [Reuse and validation](references/reuse-and-validation.md).
-4. Validate the retained target artifact and actual route against the agreed reference/criteria, then measure matched unprofiled target E2E. Resolve consequential omissions and migration regressions before accepting the result.
+Follow actual dependencies rather than insisting on engines before scheduling or scheduling before every required compute adapter. See [Target baseline](references/target-baseline.md). Do not turn migration into an exhaustive tactic, backend or topology search.
 
-Adapting inherited kernel code, launch geometry or fusion interfaces is migration. After the target baseline passes, an existing rejected candidate may receive a focused recheck when changed prerequisites invalidate its source conclusion. New mechanisms or execution-domain designs belong in the handoff. If adaptation changes the graph or engine interface, rebuild and revalidate the affected baseline.
+Validate complete target behavior, including state handoff, cancellation/reuse, long-input boundaries and streaming termination where affected. Use a minimal correct invocation followed by a representative application check; record matched target timing and resources. Source timing is context, not a target baseline. See [Reuse and validation](references/reuse-and-validation.md).
 
-## Record, deliver and stop
+## Accept and hand off
 
-Keep source records intact and create or resume an independent target whiteboard before building. Follow project conventions, otherwise use `WHITEBOARD.md` and `history/`. Keep the board near 1,000 tokens: source/target conditions, constraints, reference/baseline links, a brief mechanism/prerequisite/disposition summary, current best and reproduction command, unresolved questions and next action. Archive detailed experiments and preserve necessary links; read only relevant history on resumption. Source conclusions retain their source conditions until target evidence supports them.
+Migration passes when the target runs correctly, the actual route is known, reusable logic has been accounted for, and unsupported mechanisms or regressions are explained. An unexplained omission or correctness failure remains incomplete; do not optimize around it as though migration passed.
 
-Complete migration when the target baseline and adapted stack pass validation, important inherited coverage is accounted for, and consequential adaptation issues are resolved. An optimization may be adjusted or removed on target evidence; unexplained omission is not a completed transfer. Report unresolved correctness, execution or material regression as incomplete, preserving usable artifacts.
+Then invoke [gpu-inference-optimization](../gpu-inference-optimization/SKILL.md) with the target objective/SLO, frozen workload, reference, measured baseline, mechanism inventory, pending questions and remaining test/time/resource budget. Continue under the same task authorization and budget; do not reset the clock or create a new goal without an explicit request. Optimization does not recursively invoke migration as a mandatory step.
 
-Deliver target results and build/run commands, the mechanism inventory with target decisions, evidence limits and further leads. Then stop. Newly visible opportunities do not extend migration; a separately requested `gpu-inference-optimization` run can continue from the target record. This skill works independently of that skill's installation. The [flowchart](FLOWCHART.svg) summarizes the workflow.
+If the user requested migration only, stop after delivery. If the budget is exhausted or the optimization skill is unavailable, report the unexecuted handoff explicitly rather than claiming optimization occurred.
+
+Keep a concise target whiteboard and linked history. Deliver reproduction commands, correctness/performance evidence, retained/adapted/unsupported source mechanisms, target-specific tuning needs and rollback. Do not deploy unless authorized. The [flowchart](FLOWCHART.svg) summarizes the handoff.

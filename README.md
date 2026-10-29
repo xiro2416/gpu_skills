@@ -4,8 +4,8 @@
 
 | Skill | 用途 | 入口 | 流程图 |
 |---|---|---|---|
-| GPU Inference Optimization | 建立可靠框架基线，以实际执行证据推进端到端优化 | [SKILL.md](gpu-inference-optimization/SKILL.md) | [SVG](gpu-inference-optimization/FLOWCHART.svg) |
-| GPU Inference Migration | 在相同模型、硬件、后端和量化配方下迁移 batch、shape 或长度 | [SKILL.md](gpu-inference-migration/SKILL.md) | [SVG](gpu-inference-migration/FLOWCHART.svg) |
+| GPU Inference Optimization | 框架无关，依据实际瓶颈联合优化调度、算子、延迟、吞吐与并发 | [SKILL.md](gpu-inference-optimization/SKILL.md) | [SVG](gpu-inference-optimization/FLOWCHART.svg) |
+| GPU Inference Migration | 同模型跨 GPU、后端或负载迁移，优先复用通用逻辑，验收后进入优化 | [SKILL.md](gpu-inference-migration/SKILL.md) | [SVG](gpu-inference-migration/FLOWCHART.svg) |
 
 ## 目录布局
 
@@ -30,9 +30,9 @@ gpu_parameters/
 
 ## 工作方式
 
-- 优化以正确性和用户指定的 E2E 延迟或吞吐为依据；性能优先，功耗不作惩罚。
-- 开始时读取适用于当前 GPU 的画像，避免套用其他架构或 SKU 的参数。
-- 迁移先建立目标框架基线，再适配已有机制；记录旧结论的适用前提及目标处置，验收后由用户另行启动进一步优化。
+- 优化以正确性及用户指定的端到端延迟、吞吐、并发或资源目标为依据；功耗和 GPU-Util 不能替代 goodput 与 SLO 验收。
+- 按实际硬件读取相关 GPU 画像；不预设 TensorRT 或其他后端，也不照搬源设备的参数。
+- 迁移优先复用请求生命周期、逻辑 P/D、deadline、状态所有权和流式边界；区分通用设计、环境参数及绑定实现。目标基线通过后调用 optimization，沿用原授权与剩余预算；用户要求仅迁移时停止。
 - 项目记录采用短活动白板和按需读取的历史。迁移保留源记录，并建立独立目标白板。
 
 ## GPU 资料

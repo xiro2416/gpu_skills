@@ -1,27 +1,13 @@
-# Framework and implementation baseline
+# Actual execution baseline
 
-Read when establishing a baseline or resolving an export, representation, build or backend gap.
+Read when establishing the deployed route or investigating an implementation gap.
 
-## Identify the deployed computation
+Verify what the real entrypoint loads and executes: model assets, precision, preprocessing, runtime settings, caches and fallbacks. A standalone script is not automatically equivalent to the service. Keep correctness and performance timing boundaries explicit.
 
-Inspect the installed backend/version, representative shapes, precision and effective route against the selected GPU profile. TensorRT-LLM backends differ: follow their supported preparation and runtime rather than assuming ONNX export or a TensorRT engine. Consult version-matched [architecture documentation](https://nvidia.github.io/TensorRT-LLM/architecture/overview.html) and source.
+Reuse a valid deployment baseline. No TensorRT, TensorRT-LLM, ONNX export or other compiler/backend is mandatory. Backend selection should answer an observed limitation and respect the user's constraints; it is not a checklist of frameworks to try.
 
-For ONNX, use the modern PyTorch exporter and its optimization/verification capabilities where supported. Check their actual coverage using the [installed-release guidance](https://docs.pytorch.org/docs/stable/onnx.html). Export success does not validate the final runtime.
+Inspect expensive repeated regions for missing fusion, conversions, materialization, redundant computation and unsuitable work distribution. Include custom code and boundaries between implementations. Repeated graph passes, maximal build effort or a framework label do not prove implementation quality.
 
-## Inspect costly regions early
+Use the chosen backend's installed-version capabilities when relevant: operator selection, library algorithms, compilation, autotuning, profiles or custom kernels. Use supported export/build paths only when that route is selected. An incompatible serialized artifact may need rebuilding; an accepted dynamic shape proves legality, not suitability. Static specialization is useful only if it matches the real workload and does not create harmful padding or fragmentation.
 
-Use existing traces, engine inspection and source to review consequential repeated computation before investing heavily in specialization. Establish which semantic regions receive which implementations, including custom paths and boundaries between engines and application code. Check:
-
-- Fusion and reusable computation actually covered, including similar regions that were omitted.
-- Layout/precision conversions, intermediate writes and repeated movement or recomputation.
-- Work distribution and live state that may limit parallel execution.
-
-Investigate relevant gaps with a focused probe. This is a review of important costs, not an exhaustive operator checklist or a requirement to try every fusion. Framework search optimizes the representation it receives; inherited custom code also needs scrutiny. Choose graph canonicalization, an existing fused operator/plugin, or another permitted implementation when evidence supports it. Repeated GraphSurgeon/constant-folding passes without a hypothesis do not establish a stronger baseline.
-
-## Build for the actual target
-
-Reuse a baseline whose representation, target coverage, search and validation remain adequate. Otherwise use actual static shapes where appropriate and the highest supported, applicable search effort. Discover builder, tiling/code-generation and build-route capabilities without artificial tactic or workspace restrictions; retain real hardware and task limits.
-
-Search effort and runtime choices differ. Evaluate relevant stream, partition and profile choices by execution evidence. Routine sweeps of lower search levels or repeated tactic searches require a concrete unresolved question.
-
-Screen representation changes with local probes or cheaper builds that can exercise the proposed mechanism; compare at matched fidelity. Use strong search for credible finalists, compatible caches with provenance and adequate coverage, and validate the final rebuilt artifact. See [TensorRT build guidance](https://docs.nvidia.com/deeplearning/tensorrt/latest/performance/optimization.html).
+Screen with inexpensive probes that exercise the mechanism. Spend build/search effort on credible candidates and unresolved questions, within budget; do not require the highest search level by default. Reuse compatible caches with provenance and validate the actual rebuilt or reconfigured application route.

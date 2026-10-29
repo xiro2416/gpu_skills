@@ -1,30 +1,29 @@
 # Choose a remedy from execution evidence
 
-Read when an observed cost needs a discriminating experiment or implementation change.
+Read when selecting a probe or implementation change.
 
-## Start with the exposed cost
+## Diagnose before choosing a tool
 
-Select the simplest plausible remedy for a consequential cost. Check basic representation and implementation quality early, including inherited custom code; a high-effort engine build is not evidence that these opportunities were addressed.
-
-| Observed mechanism | Useful investigation |
+| Exposed cost | Candidate investigation |
 |---|---|
-| Missing fusion or redundant computation | Inspect the graph and actual fused path; test canonicalization, existing fused operators/plugins or permitted local fusion. |
-| Conversion, copies or intermediates | Trace production, storage and consumption; test layout, reuse or fusion that removes measured traffic. |
-| Large live state or poor work distribution | Examine tile decomposition, register/shared-memory use, spill and available parallel work. |
-| Exposed submission, synchronization or transfer cost | Test capture/replay, submission granularity, residency or GPU-side control with the same request semantics. |
+| Ready work blocked by CPU submission, locks or synchronization | Concurrent preparation, shorter critical sections, independent execution contexts, fewer host/device round trips |
+| Long preparation/prefill interferes with ongoing generation | Logical P/D isolation, bounded/chunked prefill, deadline-aware admission and scheduling |
+| Batch waiting, barriers or long/short interference | Bounded coalescing, completed-subset progress, length grouping and long-request isolation |
+| Repeated small operations or launch overhead | Fusion, capture/replay, batched state updates |
+| Inefficient compute or excessive traffic | Algorithms, precision when authorized, layout, reuse, decomposition, attention/KV strategy |
 
-Trace influence on retained outputs before removing, narrowing or caching work. Preserve complete neighborhoods, masks, state ownership and cache lifetimes. Discarding an output region does not establish that its upstream computation is irrelevant.
+These are hypotheses, not a required order or a default architecture. Trace effects on retained outputs before removing work; preserve neighborhoods, masks, sampling, state ownership and lifetimes.
 
-## Decide whether overlap is useful
+## Couple scheduling and operators
 
-Find work that is ready and independent in the target interval: across tiles, heads, branches or requests. Different instruction types alone do not make operations independent; an epilogue consuming an unfinished accumulator must wait for it.
+Measure stage cost and resources over the batch/length shapes actually produced by the scheduler. Use this service curve to choose batching waits, admission, chunking and kernel strategies. Operator gains can change the best schedule, and schedule changes can invalidate an operator microbenchmark.
 
-Distinguish insufficient work from work separated by execution boundaries or coarse scheduling. Persistence does not create parallelism. Check grid CTA count, per-SM resident blocks/warps, register/shared-memory demands and the pipelines actually exercised. More CTAs can improve residency or work distribution without activating additional SMs. Low Tensor activity or low board power does not establish spare execution capacity.
+Distinguish resident slots, execution batch limits, admitted requests and clients. Logical P/D does not require a particular process/GPU count. Shared read-only weights do not permit unsafe sharing of mutable state, execution contexts or workspaces.
 
-When one pipeline is limited, use the GPU profile and current execution evidence to consider overlapping useful work or redistributing existing computation between supported Tensor and SIMT/CUDA-core paths. Preserve the precision recipe and required semantics, and include conversion, shared issue, register, memory and synchronization costs. Reducing live state or changing decomposition may make coexistence possible. Favor low-cost probes of graph/submission changes or local fusion where appropriate; use bounded static schedules, warp specialization, cross-operation pipelines or dynamic queues when the observed mechanism justifies their added cost. These are choices, not a mandatory technique sequence.
+## Investigate useful overlap
 
-## Verify the tradeoff
+Find independent ready work across branches, stages or requests. More workers may isolate CPU bottlenecks but duplicate weights and traffic; more streams may share weights but still serialize at host submission or workspace locks. MPS does not automatically share weights. Compare controlled execution shapes for attribution, then tune each scheme fairly for its achievable capacity.
 
-Check architecture support and compiled behavior: instruction path, producer/consumer roles, tile geometry, registers, shared memory, spill and barriers. Setting a warp-specialization or fusion flag does not prove the intended mechanism executed. Bounded grids constrain work allocation rather than pinning blocks to particular SMs; stream overlap does not by itself prove same-SM residency.
+Check actual dependencies, CTA count, resident resources, register/shared-memory demand, bandwidth and cache working set. Low power or Tensor activity alone does not show free capacity. Stream overlap does not prove same-SM residency; different instruction types do not establish independence.
 
-Evaluate launch/materialization savings, locality and extra parallelism against scheduler/synchronization costs, larger live state, lost specialized GEMM/Conv performance and load imbalance. Use [complete-work comparisons](measurement-and-profiling.md#verify-complete-concurrent-work) and the best current E2E comparator. A local win is useful evidence, but production dependencies and downstream effects decide whether to retain it.
+Compare overlap, locality and launch savings against copies, synchronization, memory growth, lost specialized-kernel performance and contention. A smaller grouped batch may help one GPU's L2 but hurt another. Use [complete-work measurements](measurement-and-profiling.md#verify-complete-concurrent-work); never infer the cause solely from a faster or slower concurrent run.
